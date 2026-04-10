@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import { ClientRoot } from "@/components/client-root";
+import { PortalClientRoot } from "@/components/portal-client-root";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Algorithmic Fairness & Transparency Portal",
+  title: "Fairness & Transparency Portal",
   description:
-    "Transparency summaries for matchmaking, moderation, and storefront placement.",
+    "Algorithmic transparency for players and developers — bands and qualitative factors only.",
 };
 
 export default function RootLayout({
@@ -29,8 +29,8 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col font-sans text-slate-900">
-        <ClientRoot>{children}</ClientRoot>
+      <body className="min-h-full flex flex-col bg-slate-100 text-slate-900">
+        <PortalClientRoot>{children}</PortalClientRoot>
       </body>
     </html>
   );

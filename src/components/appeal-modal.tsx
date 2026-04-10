@@ -1,139 +1,123 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { X } from "lucide-react";
-import { usePortal } from "@/context/portal-provider";
-import type { AlgorithmicDecision } from "@/types/portal";
+import { AlertCircle } from "lucide-react";
+import { usePortal } from "@/context/portal-context";
+import { gameById } from "@/data/mock-data";
 import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Modal } from "@/components/ui/modal";
+import { Textarea } from "@/components/ui/textarea";
 
-export function AppealModal({
-  decision,
-  open,
-  onClose,
-}: {
-  decision: AlgorithmicDecision | null;
-  open: boolean;
-  onClose: () => void;
-}) {
-  const { submitAppeal } = usePortal();
-  const [statement, setStatement] = useState("");
+export function AppealModal() {
+  const {
+    appealModalDecision,
+    closeAppealModal,
+    submitAppeal,
+    hasPendingAppealForDecision,
+  } = usePortal();
+  const [text, setText] = useState("");
   const [error, setError] = useState<string | null>(null);
-  const [submitted, setSubmitted] = useState(false);
+
+  const open = appealModalDecision !== null;
+  const decision = appealModalDecision;
+  const game = decision ? gameById(decision.gameId) : undefined;
+  const blocked =
+    decision !== null && hasPendingAppealForDecision(decision.decisionId);
 
   useEffect(() => {
-    if (!open) {
-      setStatement("");
+    if (decision) {
+      setText("");
       setError(null);
-      setSubmitted(false);
     }
-  }, [open, decision?.decisionId]);
+  }, [decision?.decisionId]);
 
-  if (!open || !decision) return null;
+  const handleClose = () => {
+    setText("");
+    setError(null);
+    closeAppealModal();
+  };
 
   const handleSubmit = () => {
-    setError(null);
-    if (statement.trim().length < 20) {
-      setError("Please provide a bit more detail (at least 20 characters).");
-      return;
-    }
-    const result = submitAppeal({
-      decision,
-      userStatement: statement,
-    });
+    if (!decision) return;
+    const result = submitAppeal(decision.decisionId, text);
     if (!result.ok) {
-      if (result.reason === "active_exists") {
-        setError(
-          "You already have a human review in progress for this decision.",
-        );
-      } else if (result.reason === "not_eligible") {
-        setError("This decision is not eligible for human review.");
-      }
+      setError(result.reason);
       return;
     }
-    setSubmitted(true);
+    setText("");
+    setError(null);
   };
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-slate-900/40 p-4 sm:items-center"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="appeal-title"
+    <Modal
+      open={open}
+      onClose={handleClose}
+      title="Request human review"
+      description="Describe what you believe may need a second look. We share bands and categories only; raw scores are not disclosed."
     >
-      <div className="max-h-[90vh] w-full max-w-lg overflow-y-auto rounded-xl border border-slate-200 bg-white shadow-xl">
-        <div className="flex items-start justify-between border-b border-slate-100 px-5 py-4">
-          <div>
-            <h2 id="appeal-title" className="text-lg font-semibold text-slate-900">
-              Request human review
-            </h2>
-            <p className="mt-1 text-sm text-slate-600">
-              Reference: {decision.decisionType} — {decision.assignedBand}
+      {decision ? (
+        <div className="space-y-4">
+          <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 text-sm text-slate-700">
+            <p className="font-medium text-slate-900">{decision.decisionType}</p>
+            <p className="mt-1">
+              <span className="text-slate-500">Outcome band: </span>
+              {decision.assignedBand}
             </p>
+            {game ? (
+              <p className="mt-1 text-slate-600">
+                Game: {game.title}
+              </p>
+            ) : null}
           </div>
-          <button
-            type="button"
-            onClick={onClose}
-            className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"
-            aria-label="Close"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        </div>
-        <div className="space-y-4 px-5 py-4">
-          {submitted ? (
-            <p className="text-sm text-slate-700">
-              Your request was received. A specialist will review the decision
-              using approved outcome categories only. You will be notified when
-              the review is complete.
-            </p>
+
+          {blocked ? (
+            <div className="flex gap-2 rounded-lg border border-amber-200 bg-amber-50 p-3 text-sm text-amber-950">
+              <AlertCircle className="h-5 w-5 shrink-0" aria-hidden />
+              <p>
+                An active appeal already exists for this decision. This portal
+                allows one open review per decision at a time.
+              </p>
+            </div>
           ) : (
             <>
-              <p className="text-sm text-slate-600">
-                Describe your perspective. Moderators resolve appeals using
-                fixed outcome codes only; they do not enter free-form rulings in
-                this system.
-              </p>
-              <div>
-                <label
-                  htmlFor="appeal-statement"
-                  className="mb-1 block text-sm font-medium text-slate-800"
-                >
-                  Your statement
-                </label>
-                <textarea
-                  id="appeal-statement"
-                  rows={5}
-                  value={statement}
-                  onChange={(e) => setStatement(e.target.value)}
-                  className="w-full rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-sm text-slate-900 placeholder:text-slate-400 focus:border-sky-500 focus:bg-white focus:outline-none focus:ring-2 focus:ring-sky-500/20"
-                  placeholder="Explain what you believe should be reconsidered…"
+              <div className="space-y-2">
+                <Label htmlFor="appeal-text">Your summary</Label>
+                <Textarea
+                  id="appeal-text"
+                  value={text}
+                  onChange={(e) => {
+                    setText(e.target.value);
+                    setError(null);
+                  }}
+                  placeholder="Explain what you would like the review team to consider."
+                  maxLength={2000}
                 />
+                <p className="text-xs text-slate-500">{text.length}/2000</p>
               </div>
               {error ? (
-                <p className="text-sm text-red-700" role="alert">
+                <p className="text-sm text-rose-700" role="alert">
                   {error}
                 </p>
               ) : null}
+              <div className="flex flex-wrap justify-end gap-2 pt-2">
+                <Button variant="secondary" onClick={handleClose}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSubmit}>Submit appeal</Button>
+              </div>
             </>
           )}
-        </div>
-        <div className="flex justify-end gap-2 border-t border-slate-100 px-5 py-4">
-          {submitted ? (
-            <Button variant="primary" onClick={onClose}>
-              Close
-            </Button>
-          ) : (
-            <>
-              <Button variant="secondary" onClick={onClose}>
-                Cancel
+
+          {blocked ? (
+            <div className="flex justify-end pt-2">
+              <Button variant="secondary" onClick={handleClose}>
+                Close
               </Button>
-              <Button variant="primary" onClick={handleSubmit}>
-                Submit appeal
-              </Button>
-            </>
-          )}
+            </div>
+          ) : null}
         </div>
-      </div>
-    </div>
+      ) : null}
+    </Modal>
   );
 }

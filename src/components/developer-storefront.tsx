@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { Sparkles } from "lucide-react";
 import { games, storefrontInsightByGame } from "@/data/mock-data";
 import { Badge } from "@/components/ui/badge";
@@ -6,15 +7,8 @@ import { Card, CardBody, CardHeader } from "@/components/ui/card";
 const featuredGameId = "g-neon-rift";
 
 export function DeveloperStorefront() {
-  const game = games.find((g) => g.gameId === featuredGameId);
+  const game = games.find((g) => g.gameId === featuredGameId)!;
   const insight = storefrontInsightByGame[featuredGameId];
-  if (!game || !insight) {
-    return (
-      <p className="text-sm text-slate-600">
-        No storefront insight available for the selected title.
-      </p>
-    );
-  }
 
   return (
     <div className="space-y-6">
@@ -25,7 +19,14 @@ export function DeveloperStorefront() {
         <p className="mt-2 max-w-2xl text-slate-600">
           Developers see <strong className="font-medium text-slate-800">visibility bands</strong>{" "}
           and qualitative factors only. Numeric weights and ranking formulas are
-          withheld to reduce reverse-engineering risk.
+          withheld to reduce reverse-engineering risk.{" "}
+          <Link
+            href="/developer/games"
+            className="font-medium text-sky-700 underline-offset-2 hover:underline"
+          >
+            Browse all your games
+          </Link>
+          .
         </p>
       </div>
 
@@ -34,8 +35,8 @@ export function DeveloperStorefront() {
           title={game.title}
           description={`${game.developer} · ${game.publisher} · ${game.genre}`}
           action={
-            <Badge tone="blue" className="gap-1">
-              <Sparkles className="h-3 w-3" aria-hidden />
+            <Badge tone="blue">
+              <Sparkles className="mr-1 inline h-3 w-3" aria-hidden />
               Featured title
             </Badge>
           }

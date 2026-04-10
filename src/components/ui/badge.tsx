@@ -1,12 +1,11 @@
 import type { ReactNode } from "react";
 
-const tones: Record<string, string> = {
-  slate: "bg-slate-100 text-slate-800 ring-slate-500/10",
-  blue: "bg-sky-50 text-sky-900 ring-sky-600/10",
-  amber: "bg-amber-50 text-amber-900 ring-amber-600/10",
-  green: "bg-emerald-50 text-emerald-900 ring-emerald-600/10",
-  red: "bg-red-50 text-red-900 ring-red-600/10",
-};
+const tones = {
+  blue: "border-sky-200 bg-sky-50 text-sky-950",
+  slate: "border-slate-200 bg-slate-100 text-slate-800",
+  amber: "border-amber-200 bg-amber-50 text-amber-950",
+  emerald: "border-emerald-200 bg-emerald-50 text-emerald-950",
+} as const;
 
 export function Badge({
   children,
@@ -19,7 +18,7 @@ export function Badge({
 }) {
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ring-1 ring-inset ${tones[tone]} ${className}`}
+      className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${tones[tone]} ${className}`}
     >
       {children}
     </span>

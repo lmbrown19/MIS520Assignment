@@ -9,7 +9,7 @@ export function Card({
 }) {
   return (
     <div
-      className={`rounded-xl border border-slate-200/80 bg-white shadow-sm ${className}`}
+      className={`rounded-xl border border-slate-200/80 bg-white shadow-sm shadow-slate-200/40 ${className}`}
     >
       {children}
     </div>
@@ -26,14 +26,14 @@ export function CardHeader({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-1 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
-      <div>
-        <h2 className="text-base font-semibold text-slate-900">{title}</h2>
+    <div className="flex flex-col gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h3 className="text-base font-semibold text-slate-900">{title}</h3>
         {description ? (
           <p className="mt-1 text-sm text-slate-600">{description}</p>
         ) : null}
       </div>
-      {action ? <div className="shrink-0 pt-1">{action}</div> : null}
+      {action ? <div className="shrink-0">{action}</div> : null}
     </div>
   );
 }

@@ -1,5 +1,5 @@
-import { AdminReviewQueue } from "@/components/admin-review-queue";
+import { AdminQueue } from "@/components/admin-queue";
 
 export default function AdminPage() {
-  return <AdminReviewQueue />;
+  return <AdminQueue />;
 }
